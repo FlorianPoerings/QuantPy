@@ -1,4 +1,15 @@
-f2py
-numpy
-matplotlib
-pandas
+# Quant Trading Bot – Dependencies
+# Installation: pip install -r requirements.txt
+
+# ── Core Data ────────────────────────────────────────────────────────────────
+# Minimum version 0.2.54 due to Yahoo Finance API changes Feb 2025
+# curl_cffi is required by yfinance for cookie/auth handling (since 0.2.37)
+yfinance>=0.2.54
+curl_cffi>=0.7.0 # yfinance dependency for robust HTTP requests
+
+# ── Data Processing ─────────────────────────────────────────────────────────
+pandas>=2.1.0
+numpy>=1.26.0
+
+# ── AI Integration ───────────────────────────────────────────────────────────
+anthropic>=0.40.0
