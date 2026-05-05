@@ -22,17 +22,9 @@ The main documentation can be read at [Read The Docs](https://quantpy.readthedoc
 Contributions Welcome.
 ----------------------
 
-Any and all contributions for the project are welcome whether they be feature
-requests, bug reports, contributions to documentation, or patches for new
-features, bug fixes of other improvements.  Just [fork the
-repo](https://help.github.com/articles/fork-a-repo), add some content and [make
-a pull request] (https://help.github.com/articles/be-social).  If you are new
-to Git [this tutorial](http://learn.github.com/p/intro.html) is nice for further
-details.
-
 Also, just downloading the code and providing feedback is also extremely
 useful. Submit your feedback to the [issues page
-here](https://github.com/jsmidt/QuantPy/issues?state=open).  Thanks in advance.
+here](https://github.com/FlorianPoerings/QuantPy/issues?state=open).  Thanks in advance.
 
 You may also join us at #quantpy on irc.freenode.net.
 
@@ -41,7 +33,7 @@ How To Install.
 
 QuantPy may be downloaded from GitHub as::
 
-  > git clone https://github.com/jsmidt/QuantPy.git
+  > git clone https://github.com/FlorianPoerings/QuantPy.git
 
 To install QuantPy type::
 
