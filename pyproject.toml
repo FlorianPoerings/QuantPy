@@ -1,17 +1,40 @@
-from distutils.core import setup
-
-setup(
-    name='QuantPy',
-    version='0.1',
-    author='Joseph Smidt',
-    author_email='josephsmidt@gmail.com',
-    packages=['quantpy'],
-    url='https://github.com/jsmidt/QuantPy',
-    license='LICENSE',
-    description='A framework for quantitative finance In python',
-    long_description=open('README.md').read(),
-    install_requires=[
-        "pandas >= 0.10.0",
-        "matplotlib >= 1.1.0",
-    ],
-)
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+ 
+[project]
+name = "quantpy"
+version = "0.1.0"
+description = "A framework for quantitative finance in Python"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Florian Poerings" }
+]
+requires-python = ">=3.9"
+ 
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "matplotlib>=3.7",
+    "pandas-datareader>=0.10",
+    "scipy>=1.10",
+]
+ 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+ 
+[project.urls]
+Homepage = "https://github.com/FlorianPoerings/QuantPy"
+Repository = "https://github.com/FlorianPoerings/QuantPy"
+Issues = "https://github.com/FlorianPoerings/QuantPy/issues"
+ 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["quantpy*"]
+ 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
