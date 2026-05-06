@@ -230,11 +230,11 @@
         <h2>QuantPy Login</h2>
         <div class="input-group">
             <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Ad">
+            <input type="text" id="username" placeholder="...">
         </div>
         <div class="input-group">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="••••••••">
+            <input type="password" id="password" placeholder="...">
         </div>
         <button class="btn" onclick="attemptLogin()">Log In</button>
         <p class="error-msg" id="errorMsg">Invalid credentials!</p>
@@ -284,8 +284,8 @@
         // --- SECURITY NOTE ---
         // For absolute security, authentication should eventually happen via a backend.
         // For a quick prototype, changing this local variable works perfectly.
-        const VALID_USER = "admin";
-        const VALID_PASS = "quantpy2026"; // Change this password!
+        const VALID_USER = "Florian";
+        const VALID_PASS = "QuantPy2026"; // Change this password!
 
         function attemptLogin() {
             const user = document.getElementById('username').value;
