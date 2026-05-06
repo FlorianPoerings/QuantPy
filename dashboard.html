@@ -7,14 +7,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: #151f32;
-            --accent-color: #10b981;
-            --accent-blue: #3b82f6;
-            --text-color: #f3f4f6;
-            --text-muted: #9ca3af;
+            /* Neue Farben */
+            --bg-color: #f7f9fc;
+            --accent-color: #ff7a00; /* Dein Orange */
+            --accent-blue: #005aa5; /* Dein Blau */
+            
+            /* Angepasst für ein helles Design (Light Theme) */
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
             --danger-color: #ef4444;
-            --yellow: #f5c842;
+            --yellow: #f5b041;
         }
 
         * { box-sizing: border-box; }
@@ -35,18 +39,18 @@
             background-color: var(--card-bg);
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             width: 100%; max-width: 400px;
             text-align: center;
-            border: 1px solid #223554;
+            border: 1px solid var(--border-color);
         }
         .login-container h2 { margin-bottom: 24px; color: var(--accent-blue); font-size: 2rem; letter-spacing: 1px; }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; }
         .input-group input {
             width: 100%; padding: 12px; border-radius: 6px;
-            border: 1px solid #2d4162; background-color: #0b0f19;
-            color: white; font-size: 1rem;
+            border: 1px solid var(--border-color); background-color: #ffffff;
+            color: var(--text-color); font-size: 1rem;
         }
         .input-group input:focus { outline: none; border-color: var(--accent-blue); }
 
@@ -59,9 +63,9 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-full { width: 100%; padding: 12px; font-size: 1rem; }
         .btn-blue   { background-color: var(--accent-blue); }
-        .btn-blue:hover:not(:disabled)  { background-color: #2563eb; }
+        .btn-blue:hover:not(:disabled)  { background-color: #004580; }
         .btn-start  { background-color: var(--accent-color); }
-        .btn-start:hover:not(:disabled) { background-color: #059669; }
+        .btn-start:hover:not(:disabled) { background-color: #e66e00; }
         .btn-stop   { background-color: var(--danger-color); }
         .btn-stop:hover:not(:disabled)  { background-color: #dc2626; }
         .btn-outline-red  { background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); }
@@ -76,14 +80,14 @@
 
         .dashboard-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 24px; border-bottom: 1px solid #223554; padding-bottom: 20px;
+            margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;
         }
         .dashboard-header h1 { margin: 0; }
         .dashboard-header h1 span { color: var(--accent-blue); }
 
         /* ── Setup Bar ── */
         .setup-bar {
-            background: var(--card-bg); border: 1px solid #223554;
+            background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 10px; padding: 16px 20px;
             display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;
             margin-bottom: 24px;
@@ -91,7 +95,7 @@
         .setup-bar .field { display: flex; flex-direction: column; gap: 6px; }
         .setup-bar label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
         .setup-bar input, .setup-bar select {
-            background: #0b0f19; border: 1px solid #2d4162; color: white;
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-color);
             border-radius: 6px; padding: 8px 12px; font-size: 0.88rem; outline: none;
         }
         .setup-bar input:focus, .setup-bar select:focus { border-color: var(--accent-blue); }
@@ -99,7 +103,7 @@
 
         /* ── KPI Row ── */
         .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
-        .kpi { background: var(--card-bg); border: 1px solid #223554; border-radius: 10px; padding: 18px 20px; }
+        .kpi { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px 20px; }
         .kpi-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
         .kpi-value { font-size: 1.6rem; font-weight: bold; }
         .kpi-value.green { color: var(--accent-color); }
@@ -111,7 +115,7 @@
         .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
 
         /* ── Cards ── */
-        .card { background-color: var(--card-bg); border-radius: 10px; padding: 20px; border: 1px solid #223554; }
+        .card { background-color: var(--card-bg); border-radius: 10px; padding: 20px; border: 1px solid var(--border-color); }
         .card h3 { margin: 0 0 16px; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ── Status ── */
@@ -126,15 +130,15 @@
         /* ── Tables ── */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-        th { color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; padding: 8px 10px; border-bottom: 1px solid #223554; font-weight: 400; }
-        td { padding: 10px; border-bottom: 1px solid rgba(34,53,84,0.4); font-family: 'Courier New', monospace; }
+        th { color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-color); font-weight: 600; }
+        td { padding: 10px; border-bottom: 1px solid var(--border-color); font-family: 'Courier New', monospace; }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(255,255,255,0.02); }
+        tr:hover td { background: rgba(0,0,0,0.02); }
 
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: bold; letter-spacing: 0.05em; }
-        .badge-buy  { background: rgba(16,185,129,0.15); color: var(--accent-color); }
+        .badge-buy  { background: rgba(255,122,0,0.15); color: var(--accent-color); } /* Updated to Orange */
         .badge-sell { background: rgba(239,68,68,0.15);  color: var(--danger-color); }
-        .badge-hold { background: rgba(245,200,66,0.15); color: var(--yellow); }
+        .badge-hold { background: rgba(245,176,65,0.15); color: var(--yellow); }
         .risk-low     { color: var(--accent-color); }
         .risk-medium  { color: var(--yellow); }
         .risk-high    { color: #ff8c42; }
@@ -143,8 +147,8 @@
         /* ── AI Feed ── */
         .ai-feed { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
         .ai-feed::-webkit-scrollbar { width: 4px; }
-        .ai-feed::-webkit-scrollbar-thumb { background: #223554; border-radius: 2px; }
-        .ai-item { background: #0d1424; border: 1px solid #1e2d47; border-radius: 8px; padding: 10px 12px; }
+        .ai-feed::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+        .ai-item { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; }
         .ai-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .ai-symbol { font-weight: bold; color: var(--accent-blue); font-size: 0.85rem; }
         .ai-conf { font-size: 0.72rem; color: var(--text-muted); }
@@ -153,15 +157,15 @@
 
         /* ── Console ── */
         .console-logs {
-            background: #070a13; border-radius: 6px; padding: 12px;
+            background: #f8fafc; border-radius: 6px; padding: 12px;
             font-family: 'Courier New', monospace; font-size: 0.8rem;
-            color: #38bdf8; height: 150px; overflow-y: auto;
-            border: 1px solid #1e293b;
+            color: var(--accent-blue); height: 150px; overflow-y: auto;
+            border: 1px solid var(--border-color);
         }
 
         .empty-cell { text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.82rem; }
 
-        .spinner { display: inline-block; width: 11px; height: 11px; border: 2px solid #223554; border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
+        .spinner { display: inline-block; width: 11px; height: 11px; border: 2px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 1000px) {
@@ -172,12 +176,11 @@
 </head>
 <body>
 
-<!-- ── Login ── -->
 <div class="login-container" id="loginScreen">
     <h2>QuantPy</h2>
     <div class="input-group">
         <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Florian">
+        <input type="text" id="username" placeholder="Kaia">
     </div>
     <div class="input-group">
         <label for="password">Password</label>
@@ -188,7 +191,6 @@
     <p class="error-msg" id="errorMsg">Invalid credentials!</p>
 </div>
 
-<!-- ── Dashboard ── -->
 <div class="dashboard" id="dashboardScreen">
 
     <div class="dashboard-header">
@@ -196,10 +198,9 @@
         <button class="btn btn-outline-red" onclick="logout()">Secure Logout</button>
     </div>
 
-    <!-- Setup Bar -->
     <div class="setup-bar">
         <div class="field">
-            <label>Capital (€)</label>
+            <label>Capital ($)</label>
             <input type="number" id="capital" value="1000" min="100" step="100" style="width:110px">
         </div>
         <div class="field">
@@ -222,11 +223,10 @@
         </div>
     </div>
 
-    <!-- KPI Row -->
     <div class="kpi-row">
         <div class="kpi">
             <div class="kpi-label">Portfolio Value</div>
-            <div class="kpi-value" id="kpiValue">€ —</div>
+            <div class="kpi-value" id="kpiValue">$ —</div>
             <div class="kpi-sub"   id="kpiInitial">—</div>
         </div>
         <div class="kpi">
@@ -248,7 +248,6 @@
         </div>
     </div>
 
-    <!-- Equity + Status -->
     <div class="grid-3">
         <div class="card">
             <h3>Equity Curve</h3>
@@ -266,7 +265,6 @@
         </div>
     </div>
 
-    <!-- AI Feed + Positions -->
     <div class="grid-2">
         <div class="card">
             <h3>AI Decisions — Last Cycle</h3>
@@ -287,7 +285,6 @@
         </div>
     </div>
 
-    <!-- Full Analysis -->
     <div class="card" style="margin-bottom:16px">
         <h3>Full Market Analysis</h3>
         <div class="table-wrap">
@@ -300,7 +297,6 @@
         </div>
     </div>
 
-    <!-- Trade History -->
     <div class="card">
         <h3>Trade History</h3>
         <div class="table-wrap">
@@ -313,13 +309,11 @@
         </div>
     </div>
 
-</div><!-- /dashboard -->
-
-<script>
+</div><script>
 // ─── Auth ────────────────────────────────────────────────────────────────────
 // NOTE: For production, move auth to the Flask backend with sessions/tokens.
-const VALID_USER = "Florian";
-const VALID_PASS = "QuantPy2026";
+const VALID_USER = "Kaia";
+const VALID_PASS = "admin1";
 
 function attemptLogin() {
     const user = document.getElementById('username').value;
@@ -350,14 +344,14 @@ const equityChart = new Chart(
     document.getElementById('equityChart').getContext('2d'), {
     type: 'line',
     data: { labels: [], datasets: [{ data: [],
-        borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.07)',
+        borderColor: '#ff7a00', backgroundColor: 'rgba(255, 122, 0, 0.1)',
         fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }] },
     options: {
         responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
         plugins: { legend: { display: false } },
         scales: {
-            x: { ticks: { color: '#9ca3af', maxTicksLimit: 6, font: { size: 10 } }, grid: { color: '#1a2540' } },
-            y: { ticks: { color: '#9ca3af', font: { size: 10 }, callback: v => '€' + v.toFixed(0) }, grid: { color: '#1a2540' } }
+            x: { ticks: { color: '#64748b', maxTicksLimit: 6, font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+            y: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => '$' + v.toFixed(0) }, grid: { color: '#e2e8f0' } }
         }
     }
 });
@@ -365,205 +359,6 @@ const equityChart = new Chart(
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 let pollingTimer = null;
 
-function fmt(n)    { return '€' + Number(n).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function fmtT(iso) { return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
-
-function logMsg(text, color = '#38bdf8') {
-    const el = document.getElementById('consoleLogs');
-    const ts = new Date().toLocaleTimeString('de-DE');
-    el.innerHTML += `<span style="color:${color}">[${ts}] ${text}</span><br>`;
-    el.scrollTop = el.scrollHeight;
-}
-
-function setRunning(r) {
-    document.getElementById('statusDot').className   = 'status-dot' + (r ? ' active' : '');
-    document.getElementById('statusText').innerText   = r ? 'Active & Scanning Markets' : 'Stopped (Standby)';
-    document.getElementById('btnStart').style.display = r ? 'none' : '';
-    document.getElementById('btnOnce').style.display  = r ? 'none' : '';
-    document.getElementById('btnStop').style.display  = r ? '' : 'none';
-}
-
-function getParams() {
-    return {
-        capital:  parseFloat(document.getElementById('capital').value),
-        symbols:  document.getElementById('symbols').value.split(',').map(s => s.trim().toUpperCase()),
-        interval: parseInt(document.getElementById('interval').value),
-    };
-}
-
-// ─── API ──────────────────────────────────────────────────────────────────────
-async function api(url, method = 'GET', body = null) {
-    try {
-        const r = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: body ? JSON.stringify(body) : null,
-        });
-        return await r.json();
-    } catch (e) {
-        logMsg('Server not reachable — is server.py running?', '#ef4444');
-        return null;
-    }
-}
-
-async function checkServerStatus() {
-    const s = await api('/api/status');
-    if (!s) {
-        logMsg('⚠ Start server.py first: python server.py', '#f5c842');
-        return;
-    }
-    logMsg('Connected to Flask backend.', '#10b981');
-    if (s.running) { setRunning(true); startPolling(); }
-}
-
-async function startBot() {
-    const btn = document.getElementById('btnStart');
-    btn.disabled = true;
-    const res = await api('/api/start', 'POST', getParams());
-    btn.disabled = false;
-    if (!res || res.error) { logMsg('Error: ' + (res?.error || 'unknown'), '#ef4444'); return; }
-    logMsg(res.message, '#10b981');
-    setRunning(true);
-    startPolling();
-}
-
-async function stopBot() {
-    await api('/api/stop', 'POST');
-    setRunning(false);
-    stopPolling();
-    logMsg('Bot stopped.', '#ef4444');
-}
-
-async function runOnce() {
-    const btn = document.getElementById('btnOnce');
-    btn.innerHTML = '<span class="spinner"></span>Analysing...';
-    btn.disabled = true;
-    logMsg('Starting single analysis cycle...');
-    const res = await api('/api/run_once', 'POST', getParams());
-    btn.innerHTML = '▷ Run Once';
-    btn.disabled = false;
-    if (!res) return;
-    renderAll(res);
-    await refreshEquity();
-    logMsg('Analysis complete.', '#10b981');
-}
-
-// ─── Polling ──────────────────────────────────────────────────────────────────
-function startPolling() {
-    pollingTimer = setInterval(async () => {
-        const [cycle, equity] = await Promise.all([
-            api('/api/last_cycle'),
-            api('/api/equity_history'),
-        ]);
-        if (cycle && cycle.portfolio) renderAll(cycle);
-        if (equity && equity.length)  renderEquity(equity);
-    }, 10000);
-}
-function stopPolling() { clearInterval(pollingTimer); pollingTimer = null; }
-async function refreshEquity() {
-    const eq = await api('/api/equity_history');
-    if (eq && eq.length) renderEquity(eq);
-}
-
-// ─── Renderers ────────────────────────────────────────────────────────────────
-function renderAll(data) {
-    if (data.portfolio) renderPortfolio(data.portfolio);
-    if (data.analyses)  { renderAnalysis(data.analyses); renderAiFeed(data.analyses); }
-    renderTrades();
-}
-
-function renderPortfolio(p) {
-    document.getElementById('kpiValue').textContent    = fmt(p.total_value);
-    document.getElementById('kpiInitial').textContent  = 'Start: ' + fmt(document.getElementById('capital').value);
-    const el = document.getElementById('kpiPnl');
-    el.textContent = (p.pnl >= 0 ? '+' : '') + fmt(p.pnl);
-    el.className   = 'kpi-value ' + (p.pnl >= 0 ? 'green' : 'red');
-    document.getElementById('kpiPnlPct').textContent   = (p.pnl_pct >= 0 ? '+' : '') + p.pnl_pct.toFixed(2) + '%';
-    document.getElementById('kpiCash').textContent     = fmt(p.cash);
-    document.getElementById('kpiPositions').textContent = p.num_positions;
-    document.getElementById('kpiTrades').textContent   = p.num_trades;
-
-    const entries = Object.entries(p.positions || {});
-    document.getElementById('positionsBody').innerHTML = entries.length
-        ? entries.map(([sym, pos]) => `<tr>
-            <td style="color:var(--accent-blue);font-weight:bold">${sym}</td>
-            <td>${pos.shares.toFixed(4)}</td>
-            <td>${fmt(pos.entry_price)}</td>
-            <td style="color:var(--danger-color)">${fmt(pos.stop_loss)}</td>
-            <td style="color:var(--accent-color)">${fmt(pos.take_profit)}</td>
-          </tr>`).join('')
-        : '<tr><td colspan="5" class="empty-cell">No open positions.</td></tr>';
-}
-
-async function renderTrades() {
-    const trades = await api('/api/trades');
-    if (!trades) return;
-    document.getElementById('tradesBody').innerHTML = trades.length
-        ? [...trades].reverse().slice(0, 20).map(t => {
-            const pnl = t.action === 'SELL'
-                ? `<span style="color:${t.pnl >= 0 ? 'var(--accent-color)' : 'var(--danger-color)'}">
-                   ${t.pnl >= 0 ? '+' : ''}${fmt(t.pnl)}</span>`
-                : '—';
-            return `<tr>
-              <td style="color:var(--text-muted)">${fmtT(t.timestamp)}</td>
-              <td style="color:var(--accent-blue);font-weight:bold">${t.symbol}</td>
-              <td><span class="badge badge-${t.action.toLowerCase()}">${t.action}</span></td>
-              <td>${t.shares.toFixed(4)}</td>
-              <td>${fmt(t.price)}</td>
-              <td>${pnl}</td>
-            </tr>`;
-          }).join('')
-        : '<tr><td colspan="6" class="empty-cell">No trades yet.</td></tr>';
-}
-
-function renderAnalysis(analyses) {
-    document.getElementById('analysisBody').innerHTML = analyses.length
-        ? analyses.map(a => {
-            const d = a.decision, r = a.risk;
-            const cc = d.confidence >= 70 ? 'var(--accent-color)' : d.confidence >= 50 ? 'var(--yellow)' : 'var(--danger-color)';
-            return `<tr>
-              <td style="color:var(--accent-blue);font-weight:bold">${a.symbol}</td>
-              <td>${fmt(a.price)}</td>
-              <td><span class="badge badge-${d.action.toLowerCase()}">${d.action}</span></td>
-              <td style="color:${cc};font-weight:bold">${d.confidence}%</td>
-              <td class="risk-${(r.score||'medium').toLowerCase()}" style="font-weight:bold">${r.score}</td>
-              <td>${(r.sharpe||0).toFixed(2)}</td>
-              <td>${(r.var_95||0).toFixed(2)}%</td>
-              <td style="color:var(--text-muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                ${d.reasoning||'—'}</td>
-            </tr>`;
-          }).join('')
-        : '<tr><td colspan="8" class="empty-cell">No data.</td></tr>';
-}
-
-function renderAiFeed(analyses) {
-    document.getElementById('aiFeed').innerHTML = analyses.map(a => {
-        const d = a.decision;
-        return `<div class="ai-item">
-          <div class="ai-top">
-            <span class="ai-symbol">${a.symbol}
-              <span class="badge badge-${d.action.toLowerCase()}">${d.action}</span>
-            </span>
-            <span class="ai-conf">${d.confidence}% confidence</span>
-          </div>
-          <div class="ai-reason">${d.reasoning||'—'}</div>
-          ${d.risk_warning ? `<div class="ai-warn">⚠ ${d.risk_warning}</div>` : ''}
-        </div>`;
-    }).join('') || '<div class="empty-cell">No analyses yet.</div>';
-
-    analyses.forEach(a => {
-        if (a.decision.action !== 'HOLD') {
-            const col = a.decision.action === 'BUY' ? '#10b981' : '#ef4444';
-            logMsg(`${a.symbol} → ${a.decision.action} @ ${fmt(a.price)} (${a.decision.confidence}%)`, col);
-        }
-    });
-}
-
-function renderEquity(history) {
-    equityChart.data.labels = history.map(h => fmtT(h.timestamp));
-    equityChart.data.datasets[0].data = history.map(h => h.value);
-    equityChart.update();
-}
-</script>
-</body>
-</html>
+// Umstellung auf Englisch (US) Formate und $ als Standard
+function fmt(n)    { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtT(iso) { return new Date(iso).toLocaleTimeString
