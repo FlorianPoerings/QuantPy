@@ -361,4 +361,204 @@ let pollingTimer = null;
 
 // Umstellung auf Englisch (US) Formate und $ als Standard
 function fmt(n)    { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function fmtT(iso) { return new Date(iso).toLocaleTimeString
+function fmtT(iso) { return new Date(iso).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+
+function logMsg(text, color = 'var(--accent-blue)') {
+    const el = document.getElementById('consoleLogs');
+    const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+    el.innerHTML += `<span style="color:${color}">[${ts}] ${text}</span><br>`;
+    el.scrollTop = el.scrollHeight;
+}
+
+function setRunning(r) {
+    document.getElementById('statusDot').className   = 'status-dot' + (r ? ' active' : '');
+    document.getElementById('statusText').innerText   = r ? 'Active & Scanning Markets' : 'Stopped (Standby)';
+    document.getElementById('btnStart').style.display = r ? 'none' : '';
+    document.getElementById('btnOnce').style.display  = r ? 'none' : '';
+    document.getElementById('btnStop').style.display  = r ? '' : 'none';
+}
+
+function getParams() {
+    return {
+        capital:  parseFloat(document.getElementById('capital').value),
+        symbols:  document.getElementById('symbols').value.split(',').map(s => s.trim().toUpperCase()),
+        interval: parseInt(document.getElementById('interval').value),
+    };
+}
+
+// ─── API ──────────────────────────────────────────────────────────────────────
+async function api(url, method = 'GET', body = null) {
+    try {
+        const r = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: body ? JSON.stringify(body) : null,
+        });
+        return await r.json();
+    } catch (e) {
+        logMsg('Server not reachable — is server.py running?', 'var(--danger-color)');
+        return null;
+    }
+}
+
+async function checkServerStatus() {
+    const s = await api('/api/status');
+    if (!s) {
+        logMsg('⚠ Start server.py first: python server.py', 'var(--yellow)');
+        return;
+    }
+    logMsg('Connected to Flask backend.', 'var(--accent-color)');
+    if (s.running) { setRunning(true); startPolling(); }
+}
+
+async function startBot() {
+    const btn = document.getElementById('btnStart');
+    btn.disabled = true;
+    const res = await api('/api/start', 'POST', getParams());
+    btn.disabled = false;
+    if (!res || res.error) { logMsg('Error: ' + (res?.error || 'unknown'), 'var(--danger-color)'); return; }
+    logMsg(res.message, 'var(--accent-color)');
+    setRunning(true);
+    startPolling();
+}
+
+async function stopBot() {
+    await api('/api/stop', 'POST');
+    setRunning(false);
+    stopPolling();
+    logMsg('Bot stopped.', 'var(--danger-color)');
+}
+
+async function runOnce() {
+    const btn = document.getElementById('btnOnce');
+    btn.innerHTML = '<span class="spinner"></span>Analysing...';
+    btn.disabled = true;
+    logMsg('Starting single analysis cycle...');
+    const res = await api('/api/run_once', 'POST', getParams());
+    btn.innerHTML = '▷ Run Once';
+    btn.disabled = false;
+    if (!res) return;
+    renderAll(res);
+    await refreshEquity();
+    logMsg('Analysis complete.', 'var(--accent-color)');
+}
+
+// ─── Polling ──────────────────────────────────────────────────────────────────
+function startPolling() {
+    pollingTimer = setInterval(async () => {
+        const [cycle, equity] = await Promise.all([
+            api('/api/last_cycle'),
+            api('/api/equity_history'),
+        ]);
+        if (cycle && cycle.portfolio) renderAll(cycle);
+        if (equity && equity.length)  renderEquity(equity);
+    }, 10000);
+}
+function stopPolling() { clearInterval(pollingTimer); pollingTimer = null; }
+async function refreshEquity() {
+    const eq = await api('/api/equity_history');
+    if (eq && eq.length) renderEquity(eq);
+}
+
+// ─── Renderers ────────────────────────────────────────────────────────────────
+function renderAll(data) {
+    if (data.portfolio) renderPortfolio(data.portfolio);
+    if (data.analyses)  { renderAnalysis(data.analyses); renderAiFeed(data.analyses); }
+    renderTrades();
+}
+
+function renderPortfolio(p) {
+    document.getElementById('kpiValue').textContent    = fmt(p.total_value);
+    document.getElementById('kpiInitial').textContent  = 'Start: ' + fmt(document.getElementById('capital').value);
+    const el = document.getElementById('kpiPnl');
+    el.textContent = (p.pnl >= 0 ? '+' : '') + fmt(p.pnl);
+    el.className   = 'kpi-value ' + (p.pnl >= 0 ? 'green' : 'red');
+    document.getElementById('kpiPnlPct').textContent   = (p.pnl_pct >= 0 ? '+' : '') + p.pnl_pct.toFixed(2) + '%';
+    document.getElementById('kpiCash').textContent     = fmt(p.cash);
+    document.getElementById('kpiPositions').textContent = p.num_positions;
+    document.getElementById('kpiTrades').textContent   = p.num_trades;
+
+    const entries = Object.entries(p.positions || {});
+    document.getElementById('positionsBody').innerHTML = entries.length
+        ? entries.map(([sym, pos]) => `<tr>
+            <td style="color:var(--accent-blue);font-weight:bold">${sym}</td>
+            <td>${pos.shares.toFixed(4)}</td>
+            <td>${fmt(pos.entry_price)}</td>
+            <td style="color:var(--danger-color)">${fmt(pos.stop_loss)}</td>
+            <td style="color:var(--accent-color)">${fmt(pos.take_profit)}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" class="empty-cell">No open positions.</td></tr>';
+}
+
+async function renderTrades() {
+    const trades = await api('/api/trades');
+    if (!trades) return;
+    document.getElementById('tradesBody').innerHTML = trades.length
+        ? [...trades].reverse().slice(0, 20).map(t => {
+            const pnl = t.action === 'SELL'
+                ? `<span style="color:${t.pnl >= 0 ? 'var(--accent-color)' : 'var(--danger-color)'}">
+                   ${t.pnl >= 0 ? '+' : ''}${fmt(t.pnl)}</span>`
+                : '—';
+            return `<tr>
+              <td style="color:var(--text-muted)">${fmtT(t.timestamp)}</td>
+              <td style="color:var(--accent-blue);font-weight:bold">${t.symbol}</td>
+              <td><span class="badge badge-${t.action.toLowerCase()}">${t.action}</span></td>
+              <td>${t.shares.toFixed(4)}</td>
+              <td>${fmt(t.price)}</td>
+              <td>${pnl}</td>
+            </tr>`;
+          }).join('')
+        : '<tr><td colspan="6" class="empty-cell">No trades yet.</td></tr>';
+}
+
+function renderAnalysis(analyses) {
+    document.getElementById('analysisBody').innerHTML = analyses.length
+        ? analyses.map(a => {
+            const d = a.decision, r = a.risk;
+            const cc = d.confidence >= 70 ? 'var(--accent-color)' : d.confidence >= 50 ? 'var(--yellow)' : 'var(--danger-color)';
+            return `<tr>
+              <td style="color:var(--accent-blue);font-weight:bold">${a.symbol}</td>
+              <td>${fmt(a.price)}</td>
+              <td><span class="badge badge-${d.action.toLowerCase()}">${d.action}</span></td>
+              <td style="color:${cc};font-weight:bold">${d.confidence}%</td>
+              <td class="risk-${(r.score||'medium').toLowerCase()}" style="font-weight:bold">${r.score}</td>
+              <td>${(r.sharpe||0).toFixed(2)}</td>
+              <td>${(r.var_95||0).toFixed(2)}%</td>
+              <td style="color:var(--text-muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                ${d.reasoning||'—'}</td>
+            </tr>`;
+          }).join('')
+        : '<tr><td colspan="8" class="empty-cell">No data.</td></tr>';
+}
+
+function renderAiFeed(analyses) {
+    document.getElementById('aiFeed').innerHTML = analyses.map(a => {
+        const d = a.decision;
+        return `<div class="ai-item">
+          <div class="ai-top">
+            <span class="ai-symbol">${a.symbol}
+              <span class="badge badge-${d.action.toLowerCase()}">${d.action}</span>
+            </span>
+            <span class="ai-conf">${d.confidence}% confidence</span>
+          </div>
+          <div class="ai-reason">${d.reasoning||'—'}</div>
+          ${d.risk_warning ? `<div class="ai-warn">⚠ ${d.risk_warning}</div>` : ''}
+        </div>`;
+    }).join('') || '<div class="empty-cell">No analyses yet.</div>';
+
+    analyses.forEach(a => {
+        if (a.decision.action !== 'HOLD') {
+            const col = a.decision.action === 'BUY' ? 'var(--accent-color)' : 'var(--danger-color)';
+            logMsg(`${a.symbol} → ${a.decision.action} @ ${fmt(a.price)} (${a.decision.confidence}%)`, col);
+        }
+    });
+}
+
+function renderEquity(history) {
+    equityChart.data.labels = history.map(h => fmtT(h.timestamp));
+    equityChart.data.datasets[0].data = history.map(h => h.value);
+    equityChart.update();
+}
+</script>
+</body>
+</html>
