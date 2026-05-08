@@ -7,12 +7,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root {
-            /* Neue Farben */
             --bg-color: #f7f9fc;
-            --accent-color: #ff7a00; /* Dein Orange */
-            --accent-blue: #005aa5; /* Dein Blau */
-            
-            /* Angepasst für ein helles Design (Light Theme) */
+            --accent-color: #ff7a00;
+            --accent-blue: #005aa5;
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --text-muted: #64748b;
@@ -44,7 +41,14 @@
             text-align: center;
             border: 1px solid var(--border-color);
         }
-        .login-container h2 { margin-bottom: 24px; color: var(--accent-blue); font-size: 2rem; letter-spacing: 1px; }
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .login-logo h2 { margin: 0; color: var(--accent-blue); font-size: 2rem; letter-spacing: 1px; }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; }
         .input-group input {
@@ -53,6 +57,12 @@
             color: var(--text-color); font-size: 1rem;
         }
         .input-group input:focus { outline: none; border-color: var(--accent-blue); }
+
+        /* ── VR-Bank Logo SVG inline ── */
+        .vrbank-logo {
+            height: 38px;
+            width: auto;
+        }
 
         /* ── Buttons ── */
         .btn {
@@ -82,8 +92,8 @@
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;
         }
-        .dashboard-header h1 { margin: 0; }
-        .dashboard-header h1 span { color: var(--accent-blue); }
+        .dashboard-header h1 { margin: 0; display: flex; align-items: center; gap: 12px; }
+        .dashboard-header h1 span.title-text { color: var(--accent-blue); }
 
         /* ── Setup Bar ── */
         .setup-bar {
@@ -102,13 +112,27 @@
         .btn-group { display: flex; gap: 8px; }
 
         /* ── KPI Row ── */
-        .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px; }
         .kpi { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px 20px; }
         .kpi-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
         .kpi-value { font-size: 1.6rem; font-weight: bold; }
         .kpi-value.green { color: var(--accent-color); }
         .kpi-value.red   { color: var(--danger-color); }
+        .kpi-value.yellow { color: var(--yellow); }
         .kpi-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* Win Chance KPI special styling */
+        .kpi-win { position: relative; overflow: hidden; }
+        .kpi-win::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px;
+            width: var(--win-pct, 0%);
+            background: var(--win-color, var(--text-muted));
+            transition: width 0.6s ease, background 0.4s ease;
+            border-radius: 0 2px 2px 0;
+        }
 
         /* ── Layouts ── */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
@@ -136,7 +160,7 @@
         tr:hover td { background: rgba(0,0,0,0.02); }
 
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: bold; letter-spacing: 0.05em; }
-        .badge-buy  { background: rgba(255,122,0,0.15); color: var(--accent-color); } /* Updated to Orange */
+        .badge-buy  { background: rgba(255,122,0,0.15); color: var(--accent-color); }
         .badge-sell { background: rgba(239,68,68,0.15);  color: var(--danger-color); }
         .badge-hold { background: rgba(245,176,65,0.15); color: var(--yellow); }
         .risk-low     { color: var(--accent-color); }
@@ -168,16 +192,23 @@
         .spinner { display: inline-block; width: 11px; height: 11px; border: 2px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 5px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media (max-width: 1000px) {
+        @media (max-width: 1100px) {
             .kpi-row { grid-template-columns: repeat(3, 1fr); }
             .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
 
+<!-- ── Login ── -->
 <div class="login-container" id="loginScreen">
-    <h2>QuantPy</h2>
+    <div class="login-logo">
+        <img src="data:image/png;base64,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" alt="VR Bank Logo" class="vrbank-logo">
+        <h2>QuantPy</h2>
+    </div>
     <div class="input-group">
         <label for="username">Username</label>
         <input type="text" id="username" placeholder="Kaia">
@@ -191,10 +222,14 @@
     <p class="error-msg" id="errorMsg">Invalid credentials!</p>
 </div>
 
+<!-- ── Dashboard ── -->
 <div class="dashboard" id="dashboardScreen">
 
     <div class="dashboard-header">
-        <h1>QuantPy <span>Control Panel</span></h1>
+        <h1>
+            <img src="data:image/png;base64,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" alt="VR Bank Logo" style="height:32px;width:auto;">
+            QuantPy <span class="title-text">Control Panel</span>
+        </h1>
         <button class="btn btn-outline-red" onclick="logout()">Secure Logout</button>
     </div>
 
@@ -245,6 +280,12 @@
         <div class="kpi">
             <div class="kpi-label">Total Trades</div>
             <div class="kpi-value" id="kpiTrades">—</div>
+        </div>
+        <!-- NEU: Win Chance KPI -->
+        <div class="kpi kpi-win" id="kpiWinCard">
+            <div class="kpi-label">Win Chance</div>
+            <div class="kpi-value" id="kpiWinChance">—</div>
+            <div class="kpi-sub"   id="kpiWinSub">Ø AI Confidence (BUY/SELL)</div>
         </div>
     </div>
 
@@ -309,9 +350,10 @@
         </div>
     </div>
 
-</div><script>
+</div>
+
+<script>
 // ─── Auth ────────────────────────────────────────────────────────────────────
-// NOTE: For production, move auth to the Flask backend with sessions/tokens.
 const VALID_USER = "Kaia";
 const VALID_PASS = "admin1";
 
@@ -337,6 +379,7 @@ function logout() {
     document.getElementById('dashboardScreen').style.display = 'none';
     document.body.style.alignItems = 'center';
     stopPolling();
+    stopIntervalBot(); // FIX: auch Interval-basierter Bot stoppen
 }
 
 // ─── Chart ────────────────────────────────────────────────────────────────────
@@ -357,9 +400,9 @@ const equityChart = new Chart(
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-let pollingTimer = null;
+let pollingTimer   = null;
+let intervalBotTimer = null; // FIX: eigener Timer für Intervall-basierten Bot-Lauf
 
-// Umstellung auf Englisch (US) Formate und $ als Standard
 function fmt(n)    { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fmtT(iso) { return new Date(iso).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
 
@@ -408,25 +451,55 @@ async function checkServerStatus() {
         return;
     }
     logMsg('Connected to Flask backend.', 'var(--accent-color)');
-    if (s.running) { setRunning(true); startPolling(); }
+    if (s.running) { setRunning(true); startPolling(); startIntervalBot(); }
 }
 
+// ─── Bot Start / Stop ─────────────────────────────────────────────────────────
 async function startBot() {
     const btn = document.getElementById('btnStart');
     btn.disabled = true;
-    const res = await api('/api/start', 'POST', getParams());
+    const params = getParams();
+    const res = await api('/api/start', 'POST', params);
     btn.disabled = false;
     if (!res || res.error) { logMsg('Error: ' + (res?.error || 'unknown'), 'var(--danger-color)'); return; }
     logMsg(res.message, 'var(--accent-color)');
     setRunning(true);
     startPolling();
+    startIntervalBot(params.interval); // FIX: Interval-Timer starten
 }
 
 async function stopBot() {
     await api('/api/stop', 'POST');
     setRunning(false);
     stopPolling();
+    stopIntervalBot(); // FIX: Interval-Timer stoppen
     logMsg('Bot stopped.', 'var(--danger-color)');
+}
+
+// FIX: Interval-basierter Analyse-Zyklus — ersetzt serverseitiges Polling
+// Beim 1-Min-Intervall feuert er exakt alle interval Sekunden und kann sauber gestoppt werden
+function startIntervalBot(intervalSec) {
+    stopIntervalBot(); // vorherigen stoppen, falls vorhanden
+    const ms = (intervalSec || parseInt(document.getElementById('interval').value)) * 1000;
+    intervalBotTimer = setInterval(async () => {
+        // prüfen ob Bot noch laufen soll (könnte durch stopBot() gestoppt worden sein)
+        if (!intervalBotTimer) return;
+        logMsg('Cycle triggered by interval timer...', 'var(--text-muted)');
+        const params = getParams();
+        const res = await api('/api/run_once', 'POST', params);
+        if (!res) return;
+        renderAll(res);
+        await refreshEquity();
+        logMsg('Cycle complete.', 'var(--accent-color)');
+    }, ms);
+    logMsg(`Interval bot running every ${ms / 1000}s.`, 'var(--accent-color)');
+}
+
+function stopIntervalBot() {
+    if (intervalBotTimer) {
+        clearInterval(intervalBotTimer);
+        intervalBotTimer = null;
+    }
 }
 
 async function runOnce() {
@@ -443,8 +516,9 @@ async function runOnce() {
     logMsg('Analysis complete.', 'var(--accent-color)');
 }
 
-// ─── Polling ──────────────────────────────────────────────────────────────────
+// ─── Polling (Status-Sync mit Backend) ────────────────────────────────────────
 function startPolling() {
+    stopPolling();
     pollingTimer = setInterval(async () => {
         const [cycle, equity] = await Promise.all([
             api('/api/last_cycle'),
@@ -454,7 +528,14 @@ function startPolling() {
         if (equity && equity.length)  renderEquity(equity);
     }, 10000);
 }
-function stopPolling() { clearInterval(pollingTimer); pollingTimer = null; }
+
+function stopPolling() {
+    if (pollingTimer) {
+        clearInterval(pollingTimer);
+        pollingTimer = null;
+    }
+}
+
 async function refreshEquity() {
     const eq = await api('/api/equity_history');
     if (eq && eq.length) renderEquity(eq);
@@ -463,7 +544,7 @@ async function refreshEquity() {
 // ─── Renderers ────────────────────────────────────────────────────────────────
 function renderAll(data) {
     if (data.portfolio) renderPortfolio(data.portfolio);
-    if (data.analyses)  { renderAnalysis(data.analyses); renderAiFeed(data.analyses); }
+    if (data.analyses)  { renderAnalysis(data.analyses); renderAiFeed(data.analyses); renderWinChance(data.analyses); }
     renderTrades();
 }
 
@@ -552,6 +633,45 @@ function renderAiFeed(analyses) {
             logMsg(`${a.symbol} → ${a.decision.action} @ ${fmt(a.price)} (${a.decision.confidence}%)`, col);
         }
     });
+}
+
+// ── NEU: Win Chance berechnen ─────────────────────────────────────────────────
+// Ø AI Confidence aller BUY/SELL-Signale (HOLD wird ignoriert, da kein Einsatz)
+function renderWinChance(analyses) {
+    const active = analyses.filter(a => a.decision.action !== 'HOLD');
+    const el   = document.getElementById('kpiWinChance');
+    const card = document.getElementById('kpiWinCard');
+    const sub  = document.getElementById('kpiWinSub');
+
+    if (!active.length) {
+        el.textContent = '—';
+        el.className = 'kpi-value';
+        card.style.setProperty('--win-pct', '0%');
+        card.style.setProperty('--win-color', 'var(--text-muted)');
+        sub.textContent = 'No active signals';
+        return;
+    }
+
+    const avg = active.reduce((s, a) => s + (a.decision.confidence || 0), 0) / active.length;
+    const pct = Math.round(avg);
+
+    let colorClass, cssColor, label;
+    if (pct >= 70) {
+        colorClass = 'green'; cssColor = 'var(--accent-color)';
+        label = '🟢 High confidence';
+    } else if (pct >= 50) {
+        colorClass = 'yellow'; cssColor = 'var(--yellow)';
+        label = '🟡 Moderate confidence';
+    } else {
+        colorClass = 'red'; cssColor = 'var(--danger-color)';
+        label = '🔴 Low confidence';
+    }
+
+    el.textContent  = pct + '%';
+    el.className    = 'kpi-value ' + colorClass;
+    sub.textContent = label + ' · ' + active.length + ' signal' + (active.length > 1 ? 's' : '');
+    card.style.setProperty('--win-pct', pct + '%');
+    card.style.setProperty('--win-color', cssColor);
 }
 
 function renderEquity(history) {
