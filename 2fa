@@ -1,0 +1,72 @@
+"""
+QuantPy — One-Time 2FA Setup
+==============================
+Run once to generate your QR code:
+
+    python setup_2fa.py
+
+→ Scan the QR code with Google Authenticator / Authy
+→ Secret is saved in .secrets/<username>.totp
+→ Then start normally: python server.py
+"""
+
+import os
+import sys
+import pyotp
+import qrcode
+from dotenv import load_dotenv
+
+load_dotenv()
+
+username = os.environ.get("QUANT_USER", "").strip()
+if not username:
+    print("❌ QUANT_USER not set in .env!")
+    sys.exit(1)
+
+secret_path = f".secrets/{username.lower()}.totp"
+os.makedirs(".secrets", exist_ok=True)
+
+# Already set up?
+if os.path.exists(secret_path):
+    print(f"⚠  2FA for '{username}' is already set up.")
+    answer = input("   Generate a new one? (yes/no): ").strip().lower()
+    if answer != "yes":
+        print("Cancelled.")
+        sys.exit(0)
+
+# Generate new secret
+secret = pyotp.random_base32()
+with open(secret_path, "w") as f:
+    f.write(secret)
+print(f"✅ Secret saved: {secret_path}")
+
+# Generate QR code
+uri = pyotp.totp.TOTP(secret).provisioning_uri(
+    name=username,
+    issuer_name="QuantPy VR-Bank"
+)
+qr_path = f".secrets/{username.lower()}_qr.png"
+qrcode.make(uri).save(qr_path)
+
+print()
+print("=" * 52)
+print(f"  QR code saved: {qr_path}")
+print("  → Open the file and scan the code with:")
+print("    • Google Authenticator")
+print("    • Authy")
+print("    • Microsoft Authenticator")
+print()
+print(f"  Manual key (if QR code doesn't work):")
+print(f"  {secret}")
+print("=" * 52)
+print()
+
+# Test immediately
+print("Test — enter the 6-digit code from your app:")
+code = input("Code: ").strip().replace(" ", "")
+totp = pyotp.TOTP(secret)
+if totp.verify(code, valid_window=1):
+    print("✅ Code correct! 2FA is set up.")
+    print("   Now start the server: python server.py")
+else:
+    print("❌ Incorrect code. Try again or re-scan the QR code.")
