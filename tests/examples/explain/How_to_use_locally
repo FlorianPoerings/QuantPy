@@ -8,12 +8,18 @@ Clone or move into your project directory and install the required dependencies:
 
 Bash
 pip install flask flask-session python-dotenv pyotp bcrypt qrcode[pil] yfinance anthropic pandas numpy
+python -m pip install alpaca-trade-api requests
+
 Step 2: Configure Environment Variables
 Create a file named .env in the root directory (the same folder as server.py). Add the following content and replace the placeholders with your actual data:
 
 Code-Snippet
 # API Key for AI Analysis
+ALPACA_API_KEY=KEY
+ALPACA_SECRET_KEY=SECRET
+ALPACA_BASE_URL=https://paper-api.alpaca.markets
 ANTHROPIC_API_KEY=your_sk_ant_key_here
+
 
 # Security - Generate a random string for sessions
 # You can use: python -c "import secrets; print(secrets.token_hex(32))"
