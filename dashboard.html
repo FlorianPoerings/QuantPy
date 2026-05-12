@@ -251,7 +251,7 @@
             QuantPy <span class="title-text">Control Panel</span>
         </h1>
         <div class="session-info">
-            <span class="session-user">Eingeloggt als <span id="sessionUser"></span></span>
+            <span class="session-user">Logged in as <span id="sessionUser"></span></span>
             <button class="btn btn-outline-red" onclick="doLogout()">Secure Logout</button>
         </div>
     </div>
@@ -262,8 +262,18 @@
             <input type="number" id="capital" value="1000" min="100" step="100" style="width:110px">
         </div>
         <div class="field">
-            <label>Symbols</label>
-            <input type="text" id="symbols" value="AAPL,MSFT,GOOGL,NVDA,TSLA,SPY" style="width:280px">
+            <label>Watchlist</label>
+            <select id="watchlistSelect" onchange="onWatchlistChange()" style="width:200px">
+                <option value="top100">&#127942; Top 100 (S&amp;P 500)</option>
+                <option value="tech" selected>&#128187; Tech (US)</option>
+                <option value="dax">&#127465;&#127466; DAX 40</option>
+                <option value="risk">&#9889; High Risk</option>
+                <option value="custom">&#9999;&#65039; Custom...</option>
+            </select>
+        </div>
+        <div class="field" id="customSymbolsField" style="display:none">
+            <label>Custom Symbols</label>
+            <input type="text" id="customSymbols" placeholder="AAPL,MSFT,GOOGL" style="width:200px">
         </div>
         <div class="field">
             <label>Interval</label>
@@ -321,6 +331,7 @@
             <div class="status-box">
                 <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Stopped (Standby)</span>
+                <span id="marketBadge" style="margin-left:auto;font-size:0.72rem;font-weight:bold;padding:2px 10px;border-radius:12px;background:#e2e8f0;color:#64748b">Market —</span>
             </div>
             <div class="console-logs" id="consoleLogs">[--:--:--] Awaiting authorization...<br></div>
         </div>
@@ -468,7 +479,7 @@ async function submit2FA() {
     clearTotpTimer();
     document.getElementById('sessionUser').textContent = res.user || '';
     showScreen('dashboard');
-    logMsg('Eingeloggt als ' + (res.user || '') + ' (2FA verifiziert).', 'var(--success-color)');
+    logMsg('Logged in as ' + (res.user || '') + ' (2FA verifiziert).', 'var(--success-color)');
     checkServerStatus();
 }
 
@@ -529,10 +540,38 @@ function setRunning(r) {
     document.getElementById('btnStop').style.display  = r ? '' : 'none';
 }
 
+// ─── Watchlist definitions ───────────────────────────────────────────────────
+const WATCHLISTS = {
+    top100: ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','JPM','V','UNH',
+             'XOM','LLY','JNJ','MA','AVGO','HD','PG','COST','MRK','WMT',
+             'ABBV','CVX','BAC','KO','PEP','NFLX','AMD','ORCL','CRM','ACN',
+             'TMO','CSCO','WFC','ABT','MCD','PM','CAT','IBM','GS','INTC',
+             'QCOM','AXP','MS','SPGI','INTU','DHR','NEE','RTX','HON','SPY'],
+    tech:   ['AAPL','MSFT','GOOGL','NVDA','TSLA','META','AMD','INTC','QCOM','ORCL','CRM','AVGO','SPY'],
+    dax:    ['SAP','SIE','ALV','MUV2','DBK','DTE','BAS','BAYN','BMW','MBG',
+             'ADS','VOW3','RWE','HEN3','BEI','FRE','MTX','SHL','ZAL','IFX','SPY'],
+    risk:   ['TQQQ','SOXL','FNGU','LABU','SPXL','UPRO','TSLA','GME','MSTR','COIN','RIOT','MARA','SPY'],
+    custom: []
+};
+
+function onWatchlistChange() {
+    const val = document.getElementById('watchlistSelect').value;
+    document.getElementById('customSymbolsField').style.display = val === 'custom' ? '' : 'none';
+}
+
+function getSymbols() {
+    const val = document.getElementById('watchlistSelect').value;
+    if (val === 'custom') {
+        const raw = document.getElementById('customSymbols').value;
+        return raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+    }
+    return WATCHLISTS[val] || WATCHLISTS.tech;
+}
+
 function getParams() {
     return {
         capital:  parseFloat(document.getElementById('capital').value),
-        symbols:  document.getElementById('symbols').value.split(',').map(s => s.trim().toUpperCase()),
+        symbols:  getSymbols(),
         interval: parseInt(document.getElementById('interval').value),
     };
 }
@@ -627,6 +666,19 @@ function renderAll(data) {
     if (data.portfolio) renderPortfolio(data.portfolio);
     if (data.analyses)  { renderAnalysis(data.analyses); renderAiFeed(data.analyses); renderWinChance(data.analyses); }
     renderTrades();
+    // Market open/closed badge
+    if (data.market_open !== undefined) {
+        const badge = document.getElementById('marketBadge');
+        if (data.market_open) {
+            badge.textContent = '🟢 Market Open';
+            badge.style.background = 'rgba(255,122,0,0.15)';
+            badge.style.color = 'var(--accent-color)';
+        } else {
+            badge.textContent = '🔴 Market Closed';
+            badge.style.background = 'rgba(239,68,68,0.1)';
+            badge.style.color = 'var(--danger-color)';
+        }
+    }
 }
 
 function renderPortfolio(p) {
