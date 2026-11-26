@@ -1,7 +1,6 @@
 import os
 import sys
 
-# 3rd party
 from gi.repository import Gio, Gtk
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as\
     FigureCanvas
@@ -31,7 +30,6 @@ class App(Gtk.Application):
         app_menu = self.builder.get_object('app_menu')
         self.set_app_menu(app_menu)
 
-        # todo: look for a way to attach actions automatically, like handlers
         about_action = Gio.SimpleAction.new('about', None)
         about_action.connect('activate', self.onAppMenuAbout)
         self.add_action(about_action)
@@ -74,7 +72,6 @@ class Handler:
         canvas.set_size_request(500, 250)
 
         sw = self.app.builder.get_object('scrolledwindow1')
-        # remove old children
         for child in sw.get_children():
             sw.remove(child)
         sw.add(canvas)
@@ -86,7 +83,6 @@ class Handler:
             dialog.hide_on_delete()
 
     def onAboutDestroy(self, *args):
-        # we don't want to destroy the about dialog
         return True
 
 
