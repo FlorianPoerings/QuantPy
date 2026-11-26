@@ -2,12 +2,9 @@ import os
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
-# database file location
 DB_FILE = os.path.join(DATA_DIR, 'db.sqlite3')
 
-# indexes that are displayed on the dashboard
 DASHBOARD_INDEXES = {
-    #symbol, short name, long name
     '^DJI': ('DJIA', 'Dow Jones Industrial Average'),  # unfortunately, no data
     '^GSPC': ('S&P', 'S&P 500'),
     '^IXIC': ('NASDAQ', 'NASDAQ Composite'),
@@ -18,7 +15,6 @@ DASHBOARD_INDEXES = {
 }
 
 
-# http://www.gummy-stuff.org/Yahoo-data.htm
 YAHOO_SYMBOL_TAGS = {
     "a": "Ask",
     "a2": "Average Daily Volume",
