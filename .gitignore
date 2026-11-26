@@ -1,7 +1,21 @@
-*pyc
-*swp
+*.pyc
+__pycache__/
+*.swp
 docs/_build
-build
+build/
+dist/
+*.egg-info/
 .idea/
 .project
 .pydevproject
+.venv/
+.pytest_cache/
+
+# secrets & runtime state - never commit
+.env
+.secrets/
+.flask_sessions/
+audit/
+quant_trader.log
+last_cycle.json
+restricted_symbols.txt
