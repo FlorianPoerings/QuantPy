@@ -1,40 +1,46 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
- 
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "quantpy"
-version = "0.1.0"
-description = "A framework for quantitative finance in Python"
+version = "0.6.0"
+description = "Quantitative finance toolkit with an AI-assisted paper-trading bot and risk/compliance layer"
 readme = "README.md"
 license = { file = "LICENSE" }
-authors = [
-    { name = "Florian Poerings" }
-]
-requires-python = ">=3.9"
- 
+authors = [{ name = "Florian Poerings" }]
+requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
-    "matplotlib>=3.7",
-    "pandas-datareader>=0.10",
     "scipy>=1.10",
+    "matplotlib>=3.7",
+    "yfinance>=0.2.40",
 ]
- 
+
 [project.optional-dependencies]
-dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
+bot = [
+    "flask>=3.0",
+    "flask-session>=0.8",
+    "python-dotenv>=1.0",
+    "pyotp>=2.9",
+    "qrcode[pil]>=7.4",
+    "bcrypt>=4.0",
+    "anthropic>=0.40",
+    "requests>=2.31",
 ]
- 
+dev = ["pytest>=7.0", "pytest-cov>=4.0"]
+
 [project.urls]
 Homepage = "https://github.com/FlorianPoerings/QuantPy"
 Repository = "https://github.com/FlorianPoerings/QuantPy"
 Issues = "https://github.com/FlorianPoerings/QuantPy/issues"
- 
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quantpy*"]
- 
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
