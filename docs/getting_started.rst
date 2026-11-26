@@ -7,8 +7,9 @@ Getting started
 
 Welcome to QuantPy.
 
-**Disclaimer:** This is a *very* alpha project.  It is not ready to be used and
-won't be for a while.  In fact, the author is still very much learning what
+**Disclaimer:** This is an alpha project and research software, not investment
+advice.  Paper trading is the default; read ``docs/LEGAL_DE.md`` before using
+real money.  In fact, the author is still very much learning what
 such a framework needs to entail.  However, if you consider yourself a helpful
 soul contributions of any type are more then welcome. Thanks!
 
@@ -17,6 +18,9 @@ Some current capabilities:
    * Portfolio class that can import daily returns from Yahoo.
    * Calculation of optimal weights for Sharpe ratio and efficient frontier
    * Bare bones event profiler
+   * Backtester with SMA-crossover / mean-reversion strategies
+   * AI-assisted paper-trading bot with risk engine, kill switch and audit log
+   * Secured web dashboard (password + TOTP)
 
 Contributions Welcome.
 =========================
@@ -32,7 +36,7 @@ further details.
 
 Also, just downloading the code and providing feedback is also extremely
 useful. Submit your feedback to the `issues page here
-<https://github.com/jsmidt/QuantPy/issues?state=open>`_.  Thanks in advance.
+<https://github.com/FlorianPoerings/QuantPy/issues>`_.  Thanks in advance.
 
 
 .. _installing-docdir:
@@ -42,17 +46,17 @@ Installing QuantPy
 
 QuantPy may be downloaded from GitHub as::
 
-  > git clone https://github.com/jsmidt/QuantPy.git
+  > git clone https://github.com/FlorianPoerings/QuantPy.git
 
 To install QuantPy type::
 
   > cd QuantPy
-  > python setup.py install 
+  > pip install -e .
 
 The prerequisites for Quantpy are:
 
-* pandas (> 0.10.0) 
-* matplotlib (> 0.1.0) 
+* Python >= 3.10, pandas >= 2.0, numpy, scipy, matplotlib, yfinance
+* optional, for the trading bot and dashboard: ``pip install -e ".[bot]"``
 
 
 .. _example-scripts-highlighting-functionality:
