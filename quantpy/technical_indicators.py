@@ -22,7 +22,7 @@ def sma(data, window):
     if not isinstance(data, (pd.Series, pd.DataFrame)):
         raise ValueError("'data' must be a pandas Series or DataFrame.")
 
-    return pd.rolling_mean(data, window)
+    return data.rolling(window).mean()
 
 
 def smstd(data, window):
@@ -45,7 +45,7 @@ def smstd(data, window):
     if not isinstance(data, (pd.Series, pd.DataFrame)):
         raise ValueError("'data' must be a pandas Series or DataFrame.")
 
-    return pd.rolling_std(data, window)
+    return data.rolling(window).std()
 
 
 def ema(data, window):
@@ -68,7 +68,7 @@ def ema(data, window):
     if not isinstance(data, (pd.Series, pd.DataFrame)):
         raise ValueError("'data' must be a pandas Series or DataFrame.")
 
-    return pd.ewma(data, span=window)
+    return data.ewm(span=window, adjust=True).mean()
 
 
 def emstd(data, window):
@@ -92,7 +92,7 @@ def emstd(data, window):
     if not isinstance(data, (pd.Series, pd.DataFrame)):
         raise ValueError("'data' must be a pandas Series or DataFrame.")
 
-    return pd.ewmstd(data, span = window)
+    return data.ewm(span=window, adjust=True).std()
 
 
 def macd(data, ema_fast=12, ema_slow=26, ema_macd=9):
@@ -133,8 +133,8 @@ def macd(data, ema_fast=12, ema_slow=26, ema_macd=9):
         raise ValueError("'ema_macd' must be an integer " +
                          "between 1 and %d." % len(data))
 
-    macd = pd.ewma(data, span = ema_fast) - pd.ewma(data, span = ema_slow)
-    macds = pd.ewma(macd, span = ema_macd)
+    macd = data.ewm(span=ema_fast).mean() - data.ewm(span=ema_slow).mean()
+    macds = macd.ewm(span=ema_macd).mean()
 
     return macd, macds, macd - macds
 
@@ -167,11 +167,11 @@ def full_stochastic(data, lookback = 14, d_sma = 3, full_sma = 3):
         %K: Standard %K as defined above
     """
 
-    l_low = pd.rolling_min(data['Low'], lookback) 
-    h_high = pd.rolling_max(data['High'], lookback) 
+    l_low = data['Low'].rolling(lookback).min() 
+    h_high = data['High'].rolling(lookback).max() 
 
     K = (data['Close'] - l_low)/(h_high - l_low) * 100.0
-    full_K = pd.rolling_mean(K,d_sma)
-    full_D = pd.rolling_mean(full_K,full_sma)
+    full_K = K.rolling(d_sma).mean()
+    full_D = full_K.rolling(full_sma).mean()
 
     return full_K, full_D, K 
