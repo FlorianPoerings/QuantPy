@@ -1,21 +1,3 @@
-"""
-========
-numpydoc
-========
-
-Sphinx extension that handles docstrings in the Numpy standard format. [1]
-
-It will:
-
-- Convert Parameters etc. sections to field lists.
-- Convert See Also section to a See also entry.
-- Renumber references.
-- Extract the signature from the docstring, if it can't be determined otherwise.
-
-.. [1] http://projects.scipy.org/scipy/numpy/wiki/CodingStyleGuidelines#docstring-standard
-
-"""
-
 import os, re, pydoc
 from docscrape_sphinx import get_doc_object, SphinxDocString
 import inspect
@@ -23,7 +5,6 @@ import inspect
 def mangle_docstrings(app, what, name, obj, options, lines,
                       reference_offset=[0]):
     if what == 'module':
-        # Strip top title
         title_re = re.compile(r'^\s*[#*=]{4,}\n[a-z0-9 -]+\n[#*=]{4,}\s*',
                               re.I|re.S)
         lines[:] = title_re.sub('', "\n".join(lines)).split("\n")
@@ -41,7 +22,6 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         lines += ['    %s' % x for x in
                   (app.config.numpydoc_edit_link % v).split("\n")]
 
-    # replace reference numbers so that there are no duplicates
     references = []
     for l in lines:
         l = l.strip()
@@ -51,8 +31,6 @@ def mangle_docstrings(app, what, name, obj, options, lines,
             except ValueError:
                 print "WARNING: invalid reference in %s docstring" % name
 
-    # Start renaming from the biggest number, otherwise we may
-    # overwrite references.
     references.sort()
     if references:
         for i, line in enumerate(lines):
@@ -92,10 +70,6 @@ def setup(app, get_doc_object_=get_doc_object):
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('builder-inited', initialize)
     app.add_config_value('numpydoc_edit_link', None, True)
-
-#------------------------------------------------------------------------------
-# Monkeypatch sphinx.ext.autodoc to accept argspecless autodocs (Sphinx < 0.5)
-#------------------------------------------------------------------------------
 
 def monkeypatch_sphinx_ext_autodoc():
     global _original_format_signature
