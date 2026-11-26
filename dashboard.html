@@ -192,6 +192,26 @@
             .grid-2, .grid-3 { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
+        /* ── Risk & Compliance ── */
+        .risk-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 24px; margin-bottom: 14px; }
+        .rbar-top { display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 4px; }
+        .rbar-track { height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
+        .rbar-fill { height: 100%; border-radius: 4px; background: var(--success-color); transition: width .3s; }
+        .rbar-fill.warn { background: var(--yellow); } .rbar-fill.crit { background: var(--danger-color); }
+        .risk-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+        .risk-actions a { font-size: 0.78rem; color: var(--accent-blue); }
+        .kill-badge { margin-left: 10px; font-size: 0.7rem; padding: 2px 10px; border-radius: 12px; vertical-align: middle; }
+        .kill-ok { background: rgba(34,197,94,.15); color: var(--success-color); }
+        .kill-on { background: rgba(239,68,68,.15); color: var(--danger-color); }
+        .risk-blocks { font-size: 0.76rem; color: var(--text-muted); max-height: 110px; overflow-y: auto; }
+        .mode-banner { font-size: 0.75rem; font-weight: bold; padding: 6px 14px; border-radius: 8px; margin-bottom: 14px; }
+        .mode-paper { background: rgba(0,90,165,.08); color: var(--accent-blue); }
+        .mode-live  { background: rgba(239,68,68,.12); color: var(--danger-color); }
+        .legal-foot { font-size: 0.72rem; color: var(--text-muted); text-align: center; margin: 18px 0 4px; line-height: 1.5; }
+        .legal-box { max-height: 260px; overflow-y: auto; font-size: 0.8rem; line-height: 1.5; text-align: left;
+                     border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+        .legal-check { display: flex; gap: 8px; align-items: flex-start; font-size: 0.8rem; margin-bottom: 12px; text-align: left; }
     </style>
 </head>
 <body>
@@ -205,7 +225,7 @@
     <p class="auth-subtitle">Bitte melde dich an</p>
     <div class="input-group">
         <label for="username">Benutzername</label>
-        <input type="text" id="username" placeholder="Kaia" autocomplete="username">
+        <input type="text" id="username" placeholder="Benutzername" autocomplete="username">
     </div>
     <div class="input-group">
         <label for="password">Passwort</label>
@@ -243,6 +263,25 @@
     <span class="back-link" onclick="goBack()">← Zurück zum Login</span>
 </div>
 
+<!-- ── Schritt 3: Risiko- & Rechtshinweis ── -->
+<div class="auth-screen" id="screenLegal" style="max-width:520px">
+    <h2 style="margin-top:0">Risiko- &amp; Rechtshinweis</h2>
+    <div class="legal-box">
+        <p><b>Forschungs- und Lernsoftware.</b> QuantPy ist keine Anlageberatung, keine Anlageempfehlung und keine
+        Vermögensverwaltung. Es gibt keine Gewinn- oder Erfolgsgarantie. Wertpapierhandel kann zum Totalverlust führen.</p>
+        <p><b>Papierhandel ist Standard.</b> Echtgeld-Handel ist technisch gesperrt, solange er nicht bewusst dreifach
+        freigeschaltet wurde. Du bist als Betreiber selbst für Erlaubnis-, Melde-, Steuer- und Aufbewahrungspflichten verantwortlich.</p>
+        <p><b>KI ist beratend.</b> Die KI kann falsch liegen. Jede Order läuft durch harte Risikogrenzen
+        (Positionslimits, Verlustlimits, Kill-Switch, Order-Frequenz). Alle Entscheidungen werden manipulationssicher protokolliert.</p>
+        <p>Vollständige Hinweise: <a href="/legal" target="_blank" rel="noopener">Rechtliche Hinweise (docs/LEGAL_DE.md)</a>.
+        Keine Rechtsberatung.</p>
+    </div>
+    <label class="legal-check"><input type="checkbox" id="legalCheck">
+        <span>Ich habe die Hinweise gelesen, verstehe die Risiken und nutze QuantPy auf eigene Verantwortung.</span></label>
+    <button class="btn btn-blue btn-full" onclick="acceptLegal()">Akzeptieren &amp; fortfahren</button>
+    <p class="error-msg" id="legalError"></p>
+</div>
+
 <!-- ── Dashboard ── -->
 <div class="dashboard" id="dashboardScreen">
     <div class="dashboard-header">
@@ -255,6 +294,8 @@
             <button class="btn btn-outline-red" onclick="doLogout()">Secure Logout</button>
         </div>
     </div>
+
+    <div class="mode-banner mode-paper" id="modeBanner">PAPER TRADING (simulated money) — research software, no investment advice</div>
 
     <div class="setup-bar">
         <div class="field">
@@ -337,6 +378,19 @@
         </div>
     </div>
 
+    <div class="card" style="margin-bottom:16px" id="riskCard">
+        <h3>Risk &amp; Compliance <span id="killBadge" class="kill-badge kill-ok">—</span></h3>
+        <div class="risk-bars" id="riskBars"><div class="empty-cell" style="grid-column:1/-1">Run the bot to see live limits.</div></div>
+        <div class="risk-blocks" id="riskBlocks"></div>
+        <div class="risk-actions">
+            <button class="btn btn-stop" onclick="killSwitch()">⛔ Emergency Stop</button>
+            <button class="btn btn-outline-blue" onclick="resetKill()">Re-arm…</button>
+            <button class="btn btn-outline-blue" onclick="verifyAudit()">Verify audit log</button>
+            <a href="/api/audit/export">Export audit log</a>
+            <a href="/legal" target="_blank" rel="noopener">Legal notes</a>
+        </div>
+    </div>
+
     <div class="grid-2">
         <div class="card">
             <h3>AI Decisions — Last Cycle</h3>
@@ -359,7 +413,7 @@
         <h3>Full Market Analysis</h3>
         <div class="table-wrap">
             <table>
-                <thead><tr><th>Symbol</th><th>Price</th><th>Action</th><th>Confidence</th><th>Risk</th><th>Sharpe</th><th>VaR 95%</th><th>Reasoning</th></tr></thead>
+                <thead><tr><th>Symbol</th><th>Price</th><th>Action</th><th>Confidence</th><th>Risk</th><th>Sharpe</th><th>VaR 95% (1d)</th><th>Reasoning</th></tr></thead>
                 <tbody id="analysisBody"><tr><td colspan="8" class="empty-cell">Start the bot to see analysis.</td></tr></tbody>
             </table>
         </div>
@@ -374,10 +428,17 @@
             </table>
         </div>
     </div>
+<p class="legal-foot">QuantPy is research software. No investment advice, no performance promise. Paper trading by default.
+Past or simulated results are not indicative of future results. Trading involves risk of total loss.
+<a href="/legal" target="_blank" rel="noopener">Rechtliche Hinweise</a></p>
 </div>
 
 <script>
 // ─── Screen-Management ───────────────────────────────────────────────────────
+function esc(v) {
+    return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function showScreen(id) {
     document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
     document.getElementById('dashboardScreen').style.display = 'none';
@@ -478,7 +539,7 @@ async function submit2FA() {
     // Erfolgreich!
     clearTotpTimer();
     document.getElementById('sessionUser').textContent = res.user || '';
-    showScreen('dashboard');
+    await showAfterAuth();
     logMsg('Logged in as ' + (res.user || '') + ' (2FA verifiziert).', 'var(--success-color)');
     checkServerStatus();
 }
@@ -492,12 +553,30 @@ async function doLogout() {
     showScreen('screenLogin');
 }
 
+async function showAfterAuth() {
+    const st = await api('/api/status');
+    if (st && st.legal_ok === false) { showScreen('screenLegal'); return; }
+    showScreen('dashboard');
+}
+
+async function acceptLegal() {
+    const err = document.getElementById('legalError');
+    err.style.display = 'none';
+    if (!document.getElementById('legalCheck').checked) {
+        err.textContent = 'Bitte bestätige die Hinweise.'; err.style.display = 'block'; return;
+    }
+    const res = await api('/api/legal/accept', 'POST', { accepted: true });
+    if (!res || res.error) { err.textContent = res?.error || 'Fehler'; err.style.display = 'block'; return; }
+    showScreen('dashboard');
+    checkServerStatus();
+}
+
 // Beim Laden: prüfen ob Session noch aktiv
 async function checkExistingSession() {
     const res = await api('/api/auth/me');
     if (res && res.authenticated) {
         document.getElementById('sessionUser').textContent = res.user || '';
-        showScreen('dashboard');
+        await showAfterAuth();
         logMsg('Session wiederhergestellt (' + (res.user || '') + ').', 'var(--success-color)');
         checkServerStatus();
     }
@@ -581,7 +660,7 @@ async function api(url, method = 'GET', body = null) {
     try {
         const r = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'QuantPy' },
             credentials: 'same-origin',   // Session-Cookie mitsenden!
             body: body ? JSON.stringify(body) : null,
         });
@@ -591,7 +670,9 @@ async function api(url, method = 'GET', body = null) {
             showScreen('screenLogin');
             return null;
         }
-        return await r.json();
+        const j = await r.json();
+        if (r.status === 403 && j && j.code === 'legal_required') { showScreen('screenLegal'); return null; }
+        return j;
     } catch (e) {
         logMsg('Server nicht erreichbar — läuft server.py?', 'var(--danger-color)');
         return null;
@@ -602,6 +683,11 @@ async function checkServerStatus() {
     const s = await api('/api/status');
     if (!s) { logMsg('⚠ python server.py starten!', 'var(--yellow)'); return; }
     logMsg('Verbunden mit Flask-Backend.', 'var(--accent-color)');
+    const mb = document.getElementById('modeBanner');
+    if (s.paper === false) { mb.className = 'mode-banner mode-live'; mb.textContent = '⚠ LIVE TRADING — REAL MONEY AT RISK'; }
+    else { mb.className = 'mode-banner mode-paper'; mb.textContent = 'PAPER TRADING (simulated money) — research software, no investment advice'; }
+    if (s.last_error) logMsg('Letzter Zyklusfehler: ' + esc(s.last_error), 'var(--danger-color)');
+    refreshRisk();
     if (s.running) { setRunning(true); startPolling(); startIntervalBot(); }
 }
 
@@ -623,20 +709,9 @@ async function stopBot() {
     logMsg('Bot gestoppt.', 'var(--danger-color)');
 }
 
-function startIntervalBot(intervalSec) {
-    stopIntervalBot();
-    const ms = (intervalSec || parseInt(document.getElementById('interval').value)) * 1000;
-    intervalBotTimer = setInterval(async () => {
-        if (!intervalBotTimer) return;
-        logMsg('Zyklus durch Interval-Timer...', 'var(--text-muted)');
-        const res = await api('/api/run_once', 'POST', getParams());
-        if (!res) return;
-        renderAll(res); await refreshEquity();
-        logMsg('Zyklus abgeschlossen.', 'var(--accent-color)');
-    }, ms);
-    logMsg(`Interval-Bot läuft alle ${ms / 1000}s.`, 'var(--accent-color)');
-}
-function stopIntervalBot() { if (intervalBotTimer) { clearInterval(intervalBotTimer); intervalBotTimer = null; } }
+// The server-side loop is the only scheduler (a browser timer caused duplicate cycles).
+function startIntervalBot() {}
+function stopIntervalBot() {}
 
 async function runOnce() {
     const btn = document.getElementById('btnOnce');
@@ -646,6 +721,7 @@ async function runOnce() {
     const res = await api('/api/run_once', 'POST', getParams());
     btn.innerHTML = '▷ Run Once'; btn.disabled = false;
     if (!res) return;
+    if (res.error) { logMsg('Fehler: ' + esc(res.error), 'var(--danger-color)'); return; }
     renderAll(res); await refreshEquity();
     logMsg('Analyse abgeschlossen.', 'var(--accent-color)');
 }
@@ -654,6 +730,7 @@ function startPolling() {
     stopPolling();
     pollingTimer = setInterval(async () => {
         const [cycle, equity] = await Promise.all([api('/api/last_cycle'), api('/api/equity_history')]);
+        refreshRisk();
         if (cycle && cycle.portfolio) renderAll(cycle);
         if (equity && equity.length)  renderEquity(equity);
     }, 10000);
@@ -664,6 +741,7 @@ async function refreshEquity() { const eq = await api('/api/equity_history'); if
 // ─── Renderers ───────────────────────────────────────────────────────────────
 function renderAll(data) {
     if (data.portfolio) renderPortfolio(data.portfolio);
+    if (data.risk) renderRisk(data.risk);
     if (data.analyses)  { renderAnalysis(data.analyses); renderAiFeed(data.analyses); renderWinChance(data.analyses); }
     renderTrades();
     // Market open/closed badge
@@ -694,7 +772,7 @@ function renderPortfolio(p) {
     const entries = Object.entries(p.positions || {});
     document.getElementById('positionsBody').innerHTML = entries.length
         ? entries.map(([sym, pos]) => `<tr>
-            <td style="color:var(--accent-blue);font-weight:bold">${sym}</td>
+            <td style="color:var(--accent-blue);font-weight:bold">${esc(sym)}</td>
             <td>${pos.shares.toFixed(4)}</td><td>${fmt(pos.entry_price)}</td>
             <td style="color:var(--danger-color)">${fmt(pos.stop_loss)}</td>
             <td style="color:var(--accent-color)">${fmt(pos.take_profit)}</td></tr>`).join('')
@@ -711,7 +789,7 @@ async function renderTrades() {
                 : '—';
             return `<tr>
               <td style="color:var(--text-muted)">${fmtT(t.timestamp)}</td>
-              <td style="color:var(--accent-blue);font-weight:bold">${t.symbol}</td>
+              <td style="color:var(--accent-blue);font-weight:bold">${esc(t.symbol)}</td>
               <td><span class="badge badge-${t.action.toLowerCase()}">${t.action}</span></td>
               <td>${t.shares.toFixed(4)}</td><td>${fmt(t.price)}</td><td>${pnl}</td></tr>`;
           }).join('')
@@ -724,14 +802,14 @@ function renderAnalysis(analyses) {
             const d = a.decision, r = a.risk;
             const cc = d.confidence >= 70 ? 'var(--accent-color)' : d.confidence >= 50 ? 'var(--yellow)' : 'var(--danger-color)';
             return `<tr>
-              <td style="color:var(--accent-blue);font-weight:bold">${a.symbol}</td>
+              <td style="color:var(--accent-blue);font-weight:bold">${esc(a.symbol)}</td>
               <td>${fmt(a.price)}</td>
               <td><span class="badge badge-${d.action.toLowerCase()}">${d.action}</span></td>
               <td style="color:${cc};font-weight:bold">${d.confidence}%</td>
-              <td class="risk-${(r.score||'medium').toLowerCase()}" style="font-weight:bold">${r.score}</td>
-              <td>${(r.sharpe||0).toFixed(2)}</td><td>${(r.var_95||0).toFixed(2)}%</td>
+              <td class="risk-${esc((r.score||'medium').toLowerCase())}" style="font-weight:bold">${esc(r.score)}</td>
+              <td>${(r.sharpe||0).toFixed(2)}</td><td>${(r.var_95_1d||0).toFixed(2)}%</td>
               <td style="color:var(--text-muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                ${d.reasoning||'—'}</td></tr>`;
+                ${esc(d.reasoning||'—')}</td></tr>`;
           }).join('')
         : '<tr><td colspan="8" class="empty-cell">No data.</td></tr>';
 }
@@ -741,17 +819,20 @@ function renderAiFeed(analyses) {
         const d = a.decision;
         return `<div class="ai-item">
           <div class="ai-top">
-            <span class="ai-symbol">${a.symbol} <span class="badge badge-${d.action.toLowerCase()}">${d.action}</span></span>
+            <span class="ai-symbol">${esc(a.symbol)} <span class="badge badge-${d.action.toLowerCase()}">${d.action}</span></span>
             <span class="ai-conf">${d.confidence}% confidence</span>
           </div>
-          <div class="ai-reason">${d.reasoning||'—'}</div>
-          ${d.risk_warning ? `<div class="ai-warn">⚠ ${d.risk_warning}</div>` : ''}
+          <div class="ai-reason">${esc(d.reasoning||'—')}</div>
+          ${d.risk_warning ? `<div class="ai-warn">⚠ ${esc(d.risk_warning)}</div>` : ''}
+          ${a.execution ? (a.execution.executed
+              ? '<div class="ai-reason" style="color:var(--success-color)">✔ order sent</div>'
+              : `<div class="ai-warn">⛔ blocked: ${esc((a.execution.blocked||[]).join('; '))}</div>`) : ''}
         </div>`;
     }).join('') || '<div class="empty-cell">Noch keine Analysen.</div>';
     analyses.forEach(a => {
         if (a.decision.action !== 'HOLD') {
             const col = a.decision.action === 'BUY' ? 'var(--accent-color)' : 'var(--danger-color)';
-            logMsg(`${a.symbol} → ${a.decision.action} @ ${fmt(a.price)} (${a.decision.confidence}%)`, col);
+            logMsg(`${esc(a.symbol)} → ${esc(a.decision.action)} @ ${fmt(a.price)} (${a.decision.confidence}%)`, col);
         }
     });
 }
@@ -783,6 +864,66 @@ function renderEquity(history) {
     equityChart.data.labels = history.map(h => fmtT(h.timestamp));
     equityChart.data.datasets[0].data = history.map(h => h.value);
     equityChart.update();
+}
+
+// ─── Risk & Compliance panel ─────────────────────────────────────────────────
+function rbar(label, val, limit, text) {
+    const pct = limit > 0 ? Math.max(0, Math.min(100, val / limit * 100)) : 0;
+    const cls = pct >= 90 ? 'crit' : pct >= 66 ? 'warn' : '';
+    return `<div><div class="rbar-top"><span>${esc(label)}</span><span>${esc(text)}</span></div>
+            <div class="rbar-track"><div class="rbar-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+}
+
+function renderRisk(r) {
+    const badge = document.getElementById('killBadge');
+    badge.className = 'kill-badge ' + (r.kill_switch ? 'kill-on' : 'kill-ok');
+    badge.textContent = r.kill_switch ? 'KILL SWITCH ACTIVE' : 'Armed';
+    badge.title = r.kill_reason || '';
+    document.getElementById('riskBars').innerHTML = [
+        rbar('Daily loss', Math.max(0, -r.daily_pnl_pct), r.daily_loss_limit_pct, `${r.daily_pnl_pct}% / −${r.daily_loss_limit_pct}%`),
+        rbar('Drawdown from peak', Math.max(0, -r.drawdown_pct), r.drawdown_limit_pct, `${r.drawdown_pct}% / −${r.drawdown_limit_pct}%`),
+        rbar('Gross exposure', r.gross_exposure_pct, r.gross_exposure_limit_pct, `${r.gross_exposure_pct}% / ${r.gross_exposure_limit_pct}%`),
+        rbar('Open positions', r.open_positions, r.max_open_positions, `${r.open_positions} / ${r.max_open_positions}`),
+        rbar('Orders (hour)', r.orders_last_hour, r.orders_hour_limit, `${r.orders_last_hour} / ${r.orders_hour_limit}`),
+        rbar('Orders (day)', r.orders_today, r.orders_day_limit, `${r.orders_today} / ${r.orders_day_limit}`),
+        rbar('Consecutive losses', r.consecutive_losses, r.consecutive_loss_limit, `${r.consecutive_losses} / ${r.consecutive_loss_limit}`),
+    ].join('');
+    const b = r.recent_blocks || [];
+    document.getElementById('riskBlocks').innerHTML = b.length
+        ? '<b>Blocked orders</b><br>' + [...b].reverse().map(x =>
+            `${esc(fmtT(x.time))} ${esc(x.symbol)} ${esc(x.side)} — ${esc((x.reasons||[]).join('; '))}`).join('<br>')
+        : '';
+}
+
+async function refreshRisk() {
+    const r = await api('/api/risk');
+    if (r && r.available) renderRisk(r);
+}
+
+async function killSwitch() {
+    if (!confirm('Emergency stop: stop the bot, block all new entries and close positions?')) return;
+    const r = await api('/api/risk/kill', 'POST');
+    setRunning(false); stopPolling();
+    logMsg(r?.error ? 'Fehler: ' + esc(r.error) : 'KILL SWITCH aktiviert.', 'var(--danger-color)');
+    refreshRisk();
+}
+
+async function resetKill() {
+    const reason = prompt('Grund für die Freigabe (wird im Audit-Log gespeichert):');
+    if (!reason) return;
+    const code = prompt('Aktueller 2FA-Code:');
+    if (!code) return;
+    const r = await api('/api/risk/reset', 'POST', { reason, code: code.trim() });
+    logMsg(r?.ok ? 'Kill switch zurückgesetzt.' : 'Fehler: ' + esc(r?.error || 'unbekannt'),
+           r?.ok ? 'var(--accent-color)' : 'var(--danger-color)');
+    refreshRisk();
+}
+
+async function verifyAudit() {
+    const r = await api('/api/audit/verify');
+    if (!r) return;
+    logMsg(r.ok ? `Audit-Log intakt (${r.entries} Einträge).` : `AUDIT-LOG BESCHÄDIGT: ${esc(r.message)}`,
+           r.ok ? 'var(--success-color)' : 'var(--danger-color)');
 }
 
 // ─── Start ───────────────────────────────────────────────────────────────────
