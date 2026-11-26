@@ -1,0 +1,4 @@
+# One ticker per line. Symbols listed here are never bought by QuantPy.
+# Use for inside information, employer restrictions, conflicts of interest.
+# Copy to restricted_symbols.txt
+# EXAMPLE
