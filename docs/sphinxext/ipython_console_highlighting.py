@@ -1,17 +1,5 @@
-"""reST directive for syntax-highlighting ipython interactive sessions.
-
-XXX - See what improvements can be made based on the new (as of Sept 2009)
-'pycon' lexer for the python console.  At the very least it will give better
-highlighted tracebacks.
-"""
-
-#-----------------------------------------------------------------------------
-# Needed modules
-
-# Standard library
 import re
 
-# Third party
 from pygments.lexer import Lexer, do_insertions
 from pygments.lexers.agile import (PythonConsoleLexer, PythonLexer, 
                                    PythonTracebackLexer)
@@ -19,12 +7,8 @@ from pygments.token import Comment, Generic
 
 from sphinx import highlighting
 
-#-----------------------------------------------------------------------------
-# Global constants
-line_re = re.compile('.*?\n')
 
-#-----------------------------------------------------------------------------
-# Code begins - classes and functions
+line_re = re.compile('.*?\n')
 
 class IPythonConsoleLexer(Lexer):
     """
@@ -80,9 +64,6 @@ class IPythonConsoleLexer(Lexer):
                                    [(0, Generic.Prompt, continue_prompt.group())]))
                 curcode += line[continue_prompt.end():]
             elif output_prompt is not None:
-                # Use the 'error' token for output.  We should probably make
-                # our own token, but error is typicaly in a bright color like
-                # red, so it works fine for our output prompts.
                 insertions.append((len(curcode),
                                    [(0, Generic.Error, output_prompt.group())]))
                 curcode += line[output_prompt.end():]
@@ -102,13 +83,6 @@ class IPythonConsoleLexer(Lexer):
 
 def setup(app):
     """Setup as a sphinx extension."""
-
-    # This is only a lexer, so adding it below to pygments appears sufficient.
-    # But if somebody knows that the right API usage should be to do that via
-    # sphinx, by all means fix it here.  At least having this setup.py
-    # suppresses the sphinx warning we'd get without it.
     pass
 
-#-----------------------------------------------------------------------------
-# Register the extension as a valid pygments lexer
 highlighting.lexers['ipython'] = IPythonConsoleLexer()
