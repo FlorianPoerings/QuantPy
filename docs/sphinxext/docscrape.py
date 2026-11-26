@@ -1,7 +1,3 @@
-"""Extract reference documentation from the NumPy source tree.
-
-"""
-
 import inspect
 import textwrap
 import re
@@ -24,7 +20,7 @@ class Reader(object):
         if isinstance(data,list):
             self._str = data
         else:
-            self._str = data.split('\n') # store string as list of lines
+            self._str = data.split('\n')
 
         self.reset()
 
@@ -417,9 +413,6 @@ class FunctionDoc(NumpyDocString):
             print '*'*78
             print "ERROR: '%s' while parsing `%s`" % (e, self._f)
             print '*'*78
-            #print "Docstring follows:"
-            #print doclines
-            #print '='*78
 
         if not self['Signature']:
             func, func_name = self.get_func()
@@ -487,10 +480,4 @@ class ClassDoc(NumpyDocString):
         out += super(ClassDoc, self).__str__()
         out += "\n\n"
 
-        #for m in self.methods:
-        #    print "Parsing `%s`" % m
-        #    out += str(self._func_doc(getattr(self._cls,m), 'meth')) + '\n\n'
-        #    out += '.. index::\n   single: %s; %s\n\n' % (self._name, m)
-
         return out
-
