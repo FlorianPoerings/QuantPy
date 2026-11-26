@@ -18,12 +18,14 @@ MOCK_PRICES = {
 }
  
  
-def mock_data_reader(symbol, *args, **kwargs):
+def mock_data_reader(symbol, start=None, end=None):
+    if symbol not in MOCK_PRICES:
+        raise ValueError('unknown')
     return make_mock_df(MOCK_PRICES[symbol])
  
  
 class TestPortfolioInit(unittest.TestCase):
-    @patch('quantpy.portfolio.web.DataReader', side_effect=mock_data_reader)
+    @patch('quantpy.portfolio._download', side_effect=mock_data_reader)
     def setUp(self, _):
         self.portfolio = Portfolio(['AAPL', 'MSFT'])
  
@@ -49,7 +51,7 @@ class TestPortfolioInit(unittest.TestCase):
  
  
 class TestPortfolioBetas(unittest.TestCase):
-    @patch('quantpy.portfolio.web.DataReader', side_effect=mock_data_reader)
+    @patch('quantpy.portfolio._download', side_effect=mock_data_reader)
     def setUp(self, _):
         self.portfolio = Portfolio(['AAPL', 'MSFT'])
  
@@ -68,7 +70,7 @@ class TestPortfolioBetas(unittest.TestCase):
  
  
 class TestPortfolioCov(unittest.TestCase):
-    @patch('quantpy.portfolio.web.DataReader', side_effect=mock_data_reader)
+    @patch('quantpy.portfolio._download', side_effect=mock_data_reader)
     def setUp(self, _):
         self.portfolio = Portfolio(['AAPL', 'MSFT'])
  
@@ -90,7 +92,7 @@ class TestPortfolioCov(unittest.TestCase):
  
  
 class TestPortfolioWeights(unittest.TestCase):
-    @patch('quantpy.portfolio.web.DataReader', side_effect=mock_data_reader)
+    @patch('quantpy.portfolio._download', side_effect=mock_data_reader)
     def setUp(self, _):
         self.portfolio = Portfolio(['AAPL', 'MSFT'])
  
@@ -116,7 +118,7 @@ class TestPortfolioWeights(unittest.TestCase):
  
  
 class TestPortfolioSharpes(unittest.TestCase):
-    @patch('quantpy.portfolio.web.DataReader', side_effect=mock_data_reader)
+    @patch('quantpy.portfolio._download', side_effect=mock_data_reader)
     def setUp(self, _):
         self.portfolio = Portfolio(['AAPL', 'MSFT'])
  
